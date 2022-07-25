@@ -9,6 +9,9 @@ using APIHavan.Data;
 using RabbitMQ.Client;
 using Newtonsoft.Json;
 using System.Text;
+using WebHavan.Models;
+using WebHavan.Services;
+using ApiEmailHavan.Models;
 
 namespace APIHavan.Controllers
 {
@@ -18,11 +21,15 @@ namespace APIHavan.Controllers
     {
         private readonly AppDbContext _context;
         private readonly ConnectionFactory _factory;
+        private readonly IEmailSender _emailSender;
+
         private const string QUEUE_NAME = "messages";
 
-        public HistoricoPrecosController(AppDbContext context)
+        public HistoricoPrecosController(AppDbContext context, IEmailSender emailSender)
         {
             _context = context;
+            _emailSender = emailSender;
+
             _factory = new ConnectionFactory
             {
                 HostName = "localhost"
@@ -59,46 +66,18 @@ namespace APIHavan.Controllers
             {
                 return BadRequest();
             }
-
             _context.Entry(historicoPreco).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
-                //enviar a requisição aqui
 
-                if (historicoPreco.preco != _context.Entry(historicoPreco).Entity.preco)
-                {
-                    string message = "Valor do preço foi alterado!!!";
+                //o put é somente utilizado para correção de um preço, então é enviado
+                //automaticamente para o cliente
 
-                    using (var connection = _factory.CreateConnection())
-                    {
-                        using (var channel = connection.CreateModel())
-                        {
-                            channel.QueueDeclare(
-                                queue: QUEUE_NAME,
-                                durable: false,
-                                exclusive: false,
-                                autoDelete: false,
-                                arguments: null);
-
-                            var stringfiedMessage = JsonConvert.SerializeObject(message);
-                            var bytesMessage = Encoding.UTF8.GetBytes(stringfiedMessage);
-
-                            channel.BasicPublish(
-                                exchange: "",
-                                routingKey: QUEUE_NAME,
-                                basicProperties: null,
-                                body: bytesMessage);
-                        }
-                    }
-                }
-
+                var message = new Message(new string[] { "jiwomi7721@5k2u.com" }, "Test email async", "This is the content from our async email.", null);
+                await _emailSender.SendEmailAsync(message);
                 
-
-
-
-
 
             }
             catch (DbUpdateConcurrencyException)
@@ -123,6 +102,18 @@ namespace APIHavan.Controllers
         {
             _context.HistoricoPrecos.Add(historicoPreco);
             await _context.SaveChangesAsync();
+
+            //O historico preço não é editado. Mas adicionado. Existe a requisição PUT para caso
+            //houver algum erro, mas será mandado também uma mensagem de correção para o preço 
+            //aqui verifica se é maior do que 0 o que já existe no banco de dados para enviar
+            //a atualização de preço
+            var values = _context.Entry(historicoPreco).GetDatabaseValues().Properties.Count;
+            
+            if (values > 0)
+            {
+                var message = new Message(new string[] { "jiwomi7721@5k2u.com" }, "Test email async", "This is the content from our async email.", null);
+                await _emailSender.SendEmailAsync(message);
+            }
 
             return CreatedAtAction("GetHistoricoPreco", new { id = historicoPreco.id }, historicoPreco);
         }

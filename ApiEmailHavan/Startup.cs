@@ -1,10 +1,7 @@
-using ApiEmailHavan.Models;
-using APIHavan.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -14,9 +11,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebHavan.Models;
 using WebHavan.Services;
 
-namespace APIHavan
+namespace ApiEmailHavan
 {
     public class Startup
     {
@@ -30,23 +28,15 @@ namespace APIHavan
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            string mySqlConnection = Configuration.GetConnectionString("DefaultConnection");
-
-            services.AddDbContextPool<AppDbContext>(options =>
-                options.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection)));
-
-            // services.AddScoped<IMailService, MailService>();
-            var emailConfig = Configuration
-                 .GetSection("EmailConfiguration")
-                 .Get<EmailConfiguration>();
-            services.AddSingleton(emailConfig);
-
-            services.AddScoped<IEmailSender, EmailSender>();
-
+            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+            services.AddTransient<WebHavan.Services.IMailService, WebHavan.Services.MailService>();
             services.AddControllers();
+            services.AddScoped<IMailService, MailService>();
+
+
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "APIHavan", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ApiEmailHavan", Version = "v1" });
             });
         }
 
@@ -57,13 +47,13 @@ namespace APIHavan
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "APIHavan v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ApiEmailHavan v1"));
             }
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
-            app.UseDeveloperExceptionPage();
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

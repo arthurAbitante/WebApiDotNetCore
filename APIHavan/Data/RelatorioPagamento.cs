@@ -12,5 +12,6 @@ namespace APIHavan.Data
         public int id { get; set; }
         public HistoricoPreco HistorioPreco{ get; set; }
         public CondicaoPagamento CondicaoPagamento { get; set; }
+        public Cliente Cliente { get; set; }
     }
 }

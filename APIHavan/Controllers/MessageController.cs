@@ -1,5 +1,7 @@
-﻿using APIHavan.Data;
+﻿using ApiEmailHavan.Models;
+using APIHavan.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using System;
@@ -18,9 +20,13 @@ namespace APIHavan.Controllers
     {
         private readonly ConnectionFactory _factory;
         private const string QUEUE_NAME = "messages";
+        private readonly IEmailSender _emailSender;
 
-        public MessageController()
+
+        public MessageController(IEmailSender emailSender)
         {
+            _emailSender = emailSender;
+
             _factory = new ConnectionFactory
             {
                 HostName = "localhost"
@@ -55,6 +61,14 @@ namespace APIHavan.Controllers
             return Accepted();
         }
 
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<EmailSender>>> sendMessages()
+        {
+            var message = new Message(new string[] { "jiwomi7721@5k2u.com" }, "Test email async", "This is the content from our async email.", null);
+            await _emailSender.SendEmailAsync(message);
+
+            return Ok();
+        }
 
     }
 }
