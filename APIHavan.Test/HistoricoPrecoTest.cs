@@ -162,5 +162,13 @@ namespace APIHavan.Test
 
             Assert.AreEqual(204, resultDelete.StatusCode);
         }
+
+
+        //testar mensagens
+        //adicionar historico
+        //verificar se foi recebido mensagem
+        //editar historico
+        //verificar se foi recebido mensagem
+
     }
 }

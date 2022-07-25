@@ -14,6 +14,7 @@ namespace APIHavan.Data
         public string cnpj { get; set; }
         [Required]
         public string razaoSocial { get; set; }
+        public string email { get; set; }
         public List<RelatorioPagamento>? RelatorioPagamento { get; set; }
     }
 }

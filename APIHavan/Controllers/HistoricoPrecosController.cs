@@ -24,12 +24,13 @@ namespace APIHavan.Controllers
         private readonly IEmailSender _emailSender;
 
         private const string QUEUE_NAME = "messages";
+        private Cliente _cliente;
 
-        public HistoricoPrecosController(AppDbContext context, IEmailSender emailSender)
+        public HistoricoPrecosController(AppDbContext context, IEmailSender emailSender, Cliente cliente)
         {
             _context = context;
             _emailSender = emailSender;
-
+            _cliente = cliente;
             _factory = new ConnectionFactory
             {
                 HostName = "localhost"
@@ -75,7 +76,7 @@ namespace APIHavan.Controllers
                 //o put é somente utilizado para correção de um preço, então é enviado
                 //automaticamente para o cliente
 
-                var message = new Message(new string[] { "jiwomi7721@5k2u.com" }, "Test email async", "This is the content from our async email.", null);
+                var message = new Message(new string[] { _cliente.email }, "Test email async", "This is the content from our async email.", null);
                 await _emailSender.SendEmailAsync(message);
                 
 
@@ -111,7 +112,7 @@ namespace APIHavan.Controllers
             
             if (values > 0)
             {
-                var message = new Message(new string[] { "jiwomi7721@5k2u.com" }, "Test email async", "This is the content from our async email.", null);
+                var message = new Message(new string[] { _cliente.email }, "Test email async", "This is the content from our async email.", null);
                 await _emailSender.SendEmailAsync(message);
             }
 
