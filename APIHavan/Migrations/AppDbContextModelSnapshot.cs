@@ -28,6 +28,9 @@ namespace APIHavan.Migrations
                         .HasMaxLength(45)
                         .HasColumnType("varchar(45)");
 
+                    b.Property<string>("email")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("razaoSocial")
                         .IsRequired()
                         .HasMaxLength(45)
@@ -139,13 +142,15 @@ namespace APIHavan.Migrations
                         .WithMany()
                         .HasForeignKey("HistorioPrecoid");
 
-                    b.HasOne("APIHavan.Data.Cliente", null)
+                    b.HasOne("APIHavan.Data.Cliente", "Cliente")
                         .WithMany("RelatorioPagamento")
                         .HasForeignKey("clienteId");
 
                     b.HasOne("APIHavan.Data.CondicaoPagamento", "CondicaoPagamento")
                         .WithMany()
                         .HasForeignKey("condicaoPagamentoId");
+
+                    b.Navigation("Cliente");
 
                     b.Navigation("CondicaoPagamento");
 

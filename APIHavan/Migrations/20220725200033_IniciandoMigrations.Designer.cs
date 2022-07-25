@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace APIHavan.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20220715204906_MigrationInicial")]
-    partial class MigrationInicial
+    [Migration("20220725200033_IniciandoMigrations")]
+    partial class IniciandoMigrations
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -29,6 +29,9 @@ namespace APIHavan.Migrations
                         .IsRequired()
                         .HasMaxLength(45)
                         .HasColumnType("varchar(45)");
+
+                    b.Property<string>("email")
+                        .HasColumnType("longtext");
 
                     b.Property<string>("razaoSocial")
                         .IsRequired()
@@ -141,13 +144,15 @@ namespace APIHavan.Migrations
                         .WithMany()
                         .HasForeignKey("HistorioPrecoid");
 
-                    b.HasOne("APIHavan.Data.Cliente", null)
+                    b.HasOne("APIHavan.Data.Cliente", "Cliente")
                         .WithMany("RelatorioPagamento")
                         .HasForeignKey("clienteId");
 
                     b.HasOne("APIHavan.Data.CondicaoPagamento", "CondicaoPagamento")
                         .WithMany()
                         .HasForeignKey("condicaoPagamentoId");
+
+                    b.Navigation("Cliente");
 
                     b.Navigation("CondicaoPagamento");
 

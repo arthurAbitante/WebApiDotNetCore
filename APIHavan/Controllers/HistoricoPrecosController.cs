@@ -24,7 +24,7 @@ namespace APIHavan.Controllers
         private readonly IEmailSender _emailSender;
 
         private const string QUEUE_NAME = "messages";
-        private Cliente _cliente;
+        private readonly Cliente _cliente;
 
         public HistoricoPrecosController(AppDbContext context, IEmailSender emailSender, Cliente cliente)
         {

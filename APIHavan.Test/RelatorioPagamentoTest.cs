@@ -189,5 +189,13 @@ namespace APIHavan.Test
 
             Assert.AreEqual(204, resultDelete.StatusCode);
         }
+
+
+
+
+        //testar relatorio com cliente, produto e preço
+        //inserir os valores e checar
+        //verificar quando vazio ou não tem
+
     }
 }

@@ -17,6 +17,7 @@ namespace APIHavan.Test
                    .UseMySql("Server=localhost;User Id=root;Password=123456;Database=havan", ServerVersion.AutoDetect("Server=localhost;User Id=root;Password=123456;Database=havan"))
                    .Options;
         private readonly IEmailSender _emailSender;
+        private readonly Cliente _cliente;
 
 
         private HistoricoPreco[] dadosHistorico()
@@ -72,7 +73,7 @@ namespace APIHavan.Test
 
 
 
-            var query = new HistoricoPrecosController(context, _emailSender);
+            var query = new HistoricoPrecosController(context, _emailSender, _cliente);
 
             var result = await query.GetHistoricoPrecos();
 
@@ -91,7 +92,7 @@ namespace APIHavan.Test
 
             PopularHistoricos(context);
 
-            var query = new HistoricoPrecosController(context, _emailSender);
+            var query = new HistoricoPrecosController(context, _emailSender, _cliente);
 
             var result = await query.GetHistoricoPreco(1);
 
@@ -108,7 +109,7 @@ namespace APIHavan.Test
 
             var context = new AppDbContext(options);
 
-            var query = new HistoricoPrecosController(context, _emailSender);
+            var query = new HistoricoPrecosController(context, _emailSender, _cliente);
 
             var result = await query.PostHistoricoPreco(historico);
 
@@ -128,7 +129,7 @@ namespace APIHavan.Test
 
             var context = new AppDbContext(options);
 
-            var query = new HistoricoPrecosController(context, _emailSender);
+            var query = new HistoricoPrecosController(context, _emailSender, _cliente);
 
             await query.PostHistoricoPreco(historico);
 
@@ -149,7 +150,7 @@ namespace APIHavan.Test
 
             var context = new AppDbContext(options);
 
-            var query = new HistoricoPrecosController(context, _emailSender);
+            var query = new HistoricoPrecosController(context, _emailSender, _cliente);
 
             var result = await query.PostHistoricoPreco(historico);
 
