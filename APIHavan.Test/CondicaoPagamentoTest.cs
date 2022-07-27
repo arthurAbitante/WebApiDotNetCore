@@ -7,59 +7,18 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using APIHavan.Test.Constants;
 
 namespace APIHavan.Test
 {
     public class Tests
-    {
-        private DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseMySql("Server=localhost;User Id=root;Password=123456;Database=havan", ServerVersion.AutoDetect("Server=localhost;User Id=root;Password=123456;Database=havan"))
-            .Options;
-
-        private CondicaoPagamento[] dadosCondicoesPagamentos()
-        {
-            var condicoesPagamentos = new[] {
-                new CondicaoPagamento{ condicaoPagamentoId = 1, descricao="Pago", dias="01/01/2020"},
-                new CondicaoPagamento{ condicaoPagamentoId = 2, descricao="Pago", dias="01/02/2020"},
-                new CondicaoPagamento{ condicaoPagamentoId = 3, descricao="Pago", dias="01/03/2020"},
-                new CondicaoPagamento{ condicaoPagamentoId = 4, descricao="Pago", dias="01/04/2020"},
-                new CondicaoPagamento{ condicaoPagamentoId = 5, descricao="Atrasado", dias="01/05/2020"},
-                new CondicaoPagamento{ condicaoPagamentoId = 6, descricao="A pagar", dias="01/06/2020"},
-            };
-            return condicoesPagamentos;
-        }
-
-        private void Popular(AppDbContext context)
-        {
-            context.CondicoesPagamentos.AddRange(dadosCondicoesPagamentos());
-            context.SaveChanges();
-        }
-
-        private void RemoverLista(AppDbContext context)
-        {
-            using (context = new AppDbContext(options))
-            {
-                context.CondicoesPagamentos.RemoveRange(dadosCondicoesPagamentos());
-                context.SaveChanges();
-            }
-
-        }
-
-        private void RemoverCondicao(AppDbContext context, CondicaoPagamento condicaoPagamento)
-        {
-            using (context = new AppDbContext(options))
-            {
-                context.CondicoesPagamentos.Remove(condicaoPagamento);
-                context.SaveChanges();
-            }
-        }
-
+    {     
         [Test]
         public async Task testePegaTodasCondicoesPagamentos()
         {
-            var context = new AppDbContext(options);
+            var context = new AppDbContext(Funcoes.options);
 
-            Popular(context);
+            Funcoes.PopularCondicao(context);
 
             var query = new CondicaoPagamentosController(context);
 
@@ -67,7 +26,7 @@ namespace APIHavan.Test
             //o assert deverá contar a lista
             Assert.AreEqual(6, result.Value.Count());
 
-            RemoverLista(context);
+            Funcoes.RemoverListaCondicao(context);
         }
 
         [Test]
@@ -75,9 +34,9 @@ namespace APIHavan.Test
         {
             var condicaoPagamento = new CondicaoPagamento { condicaoPagamentoId = 1, descricao = "Pago", dias = "01/01/2020" };
 
-            var context = new AppDbContext(options);
+            var context = new AppDbContext(Funcoes.options);
 
-            Popular(context);
+            Funcoes.PopularCondicao(context);
 
             var query = new CondicaoPagamentosController(context);
 
@@ -85,7 +44,7 @@ namespace APIHavan.Test
 
             Assert.AreEqual(condicaoPagamento.condicaoPagamentoId, result.Value.condicaoPagamentoId);
 
-            RemoverLista(context);
+            Funcoes.RemoverListaCondicao(context);
         }
 
         [Test]
@@ -93,7 +52,7 @@ namespace APIHavan.Test
         {
             var condicaoPagamento = new CondicaoPagamento { condicaoPagamentoId = 1, descricao = "Pago", dias = "01/01/2020" };
 
-            var context = new AppDbContext(options);
+            var context = new AppDbContext(Funcoes.options);
 
             var query = new CondicaoPagamentosController(context);
 
@@ -104,7 +63,7 @@ namespace APIHavan.Test
 
             Assert.AreEqual(1, item.condicaoPagamentoId);
 
-            RemoverCondicao(context, item);
+            Funcoes.RemoverCondicao(context, item);
         }
 
         [Test]
@@ -112,7 +71,7 @@ namespace APIHavan.Test
         {
             var condicaoPagamento = new CondicaoPagamento { condicaoPagamentoId = 1, descricao = "Pago", dias = "01/01/2020" };
 
-            var context = new AppDbContext(options);
+            var context = new AppDbContext(Funcoes.options);
 
             var query = new CondicaoPagamentosController(context);
 
@@ -124,7 +83,7 @@ namespace APIHavan.Test
                
             Assert.AreEqual(204, resultNovo.StatusCode);
 
-            RemoverCondicao(context, condicaoPagamento);
+            Funcoes.RemoverCondicao(context, condicaoPagamento);
         }
 
         [Test]
@@ -132,7 +91,7 @@ namespace APIHavan.Test
         {
             var condicaoPagamento = new CondicaoPagamento { condicaoPagamentoId = 1, descricao = "Pago", dias = "01/01/2020" };
 
-            var context = new AppDbContext(options);
+            var context = new AppDbContext(Funcoes.options);
 
             var query = new CondicaoPagamentosController(context);
 
@@ -151,24 +110,24 @@ namespace APIHavan.Test
         [Test]
         public async Task RetornaTipoCorreto()
         {
-            var context = new AppDbContext(options);
+            var context = new AppDbContext(Funcoes.options);
 
-            Popular(context);
+            Funcoes.PopularCondicao(context);
 
             var query = new CondicaoPagamentosController(context);
 
             var result = await query.GetCondicoesPagamentos();
 
             Assert.IsInstanceOf<ActionResult<IEnumerable<CondicaoPagamento>>>(result);
-            RemoverLista(context);
+            Funcoes.RemoverListaCondicao(context);
         }
 
         [Test]
         public async Task RetornaIdIncorreto()
         {
-            var context = new AppDbContext(options);
+            var context = new AppDbContext(Funcoes.options);
 
-            Popular(context);
+            Funcoes.PopularCondicao(context);
 
             var query = new CondicaoPagamentosController(context);
 
@@ -176,7 +135,7 @@ namespace APIHavan.Test
             var statusCode = result.Result as StatusCodeResult;
             Assert.IsInstanceOf<NotFoundResult>(statusCode);
 
-            RemoverLista(context);
+            Funcoes.RemoverListaCondicao(context);
         }
 
         [Test]
@@ -184,7 +143,7 @@ namespace APIHavan.Test
         {
             var condicaoPagamento = new CondicaoPagamento { condicaoPagamentoId = 1, descricao = "Pago", dias = "01/01/2020" };
 
-            var context = new AppDbContext(options);
+            var context = new AppDbContext(Funcoes.options);
 
             var query = new CondicaoPagamentosController(context);
 
@@ -196,7 +155,7 @@ namespace APIHavan.Test
         [Test]
         public async Task testaDeleteQuandoIdInvalido()
         {
-            var context = new AppDbContext(options);
+            var context = new AppDbContext(Funcoes.options);
 
             var query = new CondicaoPagamentosController(context);
 

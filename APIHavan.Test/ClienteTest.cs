@@ -1,5 +1,6 @@
 using APIHavan.Controllers;
 using APIHavan.Data;
+using APIHavan.Test.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
@@ -11,50 +12,12 @@ namespace APIHavan.Test
 {
     public class ClienteTest
     {
-        private DbContextOptions<AppDbContext> options = new DbContextOptionsBuilder<AppDbContext>()
-                    .UseMySql("Server=localhost;User Id=root;Password=123456;Database=havan", ServerVersion.AutoDetect("Server=localhost;User Id=root;Password=123456;Database=havan"))
-                    .Options;
-
-        private Cliente[] dadosCliente()
-        {
-            var cliente = new[] { 
-                new Cliente { clienteId = 1, cnpj = "cnpjteste", razaoSocial = "razaosocialteste", email="email1@email.com" }, 
-                new Cliente { clienteId = 2, cnpj = "cnpjtest2", razaoSocial = "razaosocialtest2", email="email2@email.com" },
-            };
-
-            return cliente;
-        }
-
-        private void PopularClientes(AppDbContext context)
-        {
-            context.Clientes.AddRange(dadosCliente());
-            context.SaveChanges();
-        }
-
-        private void RemoverListaClientes(AppDbContext context)
-        {
-            using (context = new AppDbContext(options))
-            {
-                context.Clientes.RemoveRange(dadosCliente());
-                context.SaveChanges();
-            }
-        }
-
-        private void RemoverCliente(AppDbContext context, Cliente cliente)
-        {
-            using (context = new AppDbContext(options))
-            {
-                context.Clientes.Remove(cliente);
-                context.SaveChanges();
-            }
-        }
-
         [Test]
         public async Task testePegaTodosClientes()
         {
-            var context = new AppDbContext(options);
+            var context = new AppDbContext(Funcoes.options);
 
-            PopularClientes(context);
+            Funcoes.PopularClientes(context);
 
             var query = new ClientesController(context);
 
@@ -62,7 +25,7 @@ namespace APIHavan.Test
 
             Assert.AreEqual(2, result.Value.Count());
 
-            RemoverListaClientes(context);
+            Funcoes.RemoverListaClientes(context);
         }
 
 
@@ -71,9 +34,9 @@ namespace APIHavan.Test
         {
             var cliente = new Cliente { clienteId = 1, cnpj = "cnpjteste", razaoSocial = "razaosocialteste", email = "email1@email.com" };
             
-            var context = new AppDbContext(options);
+            var context = new AppDbContext(Funcoes.options);
 
-            PopularClientes(context);
+            Funcoes.PopularClientes(context);
 
             var query = new ClientesController(context);
 
@@ -81,7 +44,7 @@ namespace APIHavan.Test
 
             Assert.AreEqual(cliente.clienteId, result.Value.clienteId);
 
-            RemoverListaClientes(context);
+            Funcoes.RemoverListaClientes(context);
         }
 
         [Test]
@@ -89,7 +52,7 @@ namespace APIHavan.Test
         {
             var cliente = new Cliente { clienteId = 1, cnpj = "cnpjteste", razaoSocial = "razaosocialteste", email = "email1@email.com" };
 
-            var context = new AppDbContext(options);
+            var context = new AppDbContext(Funcoes.options);
 
             var query = new ClientesController(context);
 
@@ -100,7 +63,7 @@ namespace APIHavan.Test
 
             Assert.AreEqual(1, item.clienteId);
 
-            RemoverCliente(context, item);
+            Funcoes.RemoverCliente(context, item);
         }
 
         [Test]
@@ -108,7 +71,7 @@ namespace APIHavan.Test
         {
             var cliente = new Cliente { clienteId = 1, cnpj = "cnpjteste", razaoSocial = "razaosocialteste", email = "email1@email.com" };
 
-            var context = new AppDbContext(options);
+            var context = new AppDbContext(Funcoes.options);
 
             var query = new ClientesController(context);
 
@@ -121,7 +84,7 @@ namespace APIHavan.Test
 
             Assert.AreEqual(204, resultNovo.StatusCode);
 
-            RemoverCliente(context, cliente);
+            Funcoes.RemoverCliente(context, cliente);
         }
 
         [Test]
@@ -129,7 +92,7 @@ namespace APIHavan.Test
         {
             var cliente = new Cliente { clienteId = 1, cnpj = "cnpjteste", razaoSocial = "razaosocialteste", email = "email1@email.com" };
 
-            var context = new AppDbContext(options);
+            var context = new AppDbContext(Funcoes.options);
 
             var query = new ClientesController(context);
 
@@ -148,24 +111,24 @@ namespace APIHavan.Test
         [Test]
         public async Task RetornaTipoCorreto()
         {
-            var context = new AppDbContext(options);
+            var context = new AppDbContext(Funcoes.options);
 
-            PopularClientes(context);
+            Funcoes.PopularClientes(context);
 
             var query = new ClientesController(context);
 
             var result = await query.GetClientes();
 
             Assert.IsInstanceOf<ActionResult<IEnumerable<Cliente>>>(result);
-            RemoverListaClientes(context);
+            Funcoes.RemoverListaClientes(context);
         }
 
         [Test]
         public async Task RetornaIdIncorreto()
         {
-            var context = new AppDbContext(options);
+            var context = new AppDbContext(Funcoes.options);
 
-            PopularClientes(context);
+            Funcoes.PopularClientes(context);
 
             var query = new ClientesController(context);
 
@@ -173,7 +136,7 @@ namespace APIHavan.Test
             var statusCode = result.Result as StatusCodeResult;
             Assert.IsInstanceOf<NotFoundResult>(statusCode);
 
-            RemoverListaClientes(context);
+            Funcoes.RemoverListaClientes(context);
         }
 
         [Test]
@@ -181,7 +144,7 @@ namespace APIHavan.Test
         {
             var cliente = new Cliente { clienteId = 1, cnpj = "cnpjteste", razaoSocial = "razaosocialteste", email = "email1@email.com" };
 
-            var context = new AppDbContext(options);
+            var context = new AppDbContext(Funcoes.options);
 
             var query = new ClientesController(context);
 
@@ -193,7 +156,7 @@ namespace APIHavan.Test
         [Test]
         public async Task testaDeleteQuandoIdInvalido()
         {
-            var context = new AppDbContext(options);
+            var context = new AppDbContext(Funcoes.options);
 
             var query = new ClientesController(context);
 
@@ -201,17 +164,5 @@ namespace APIHavan.Test
 
             Assert.AreEqual(404, resultDelete.StatusCode);
         }
-
-        /*[Test]
-        public async Task testaModelState()
-        {
-            var context = new AppDbContext(options);
-            var query = new ClientesController(context);
-            query.ModelState.AddModelError("cnpf","Required");
-            var result = await query.PostCliente(new Cliente { clienteId = 1, cnpj = null, razaoSocial = null, email = null});
-            Assert.IsInstanceOf<BadRequestObjectResult>(result);
-
-        }*/
-
     }
 }
