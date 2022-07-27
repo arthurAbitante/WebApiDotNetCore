@@ -5,6 +5,7 @@ using NUnit.Framework;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace APIHavan.Test
 {
@@ -24,12 +25,14 @@ namespace APIHavan.Test
 
             var condicaoPagamento = new CondicaoPagamento { condicaoPagamentoId = 1, descricao = "Pago", dias = "01/01/2020" };
             var condicaoPagamento2 = new CondicaoPagamento { condicaoPagamentoId = 2, descricao = "Atrasado", dias = "01/02/2020" };
+           
+            var cliente = new Cliente { clienteId = 1, cnpj = "cnpjteste", razaoSocial = "razaosocialteste", email = "email1@email.com" };
 
 
             var relatorios = new[]
             {
-                new RelatorioPagamento{ id=1, HistorioPreco = historicoPreco, CondicaoPagamento = condicaoPagamento},
-                new RelatorioPagamento{ id=2, HistorioPreco = historicoPreco, CondicaoPagamento= condicaoPagamento2},
+                new RelatorioPagamento{ id=1, HistorioPreco = historicoPreco, CondicaoPagamento = condicaoPagamento, Cliente = cliente},
+                new RelatorioPagamento{ id=2, HistorioPreco = historicoPreco, CondicaoPagamento= condicaoPagamento2, Cliente = cliente},
             };
 
             return relatorios;
@@ -86,6 +89,15 @@ namespace APIHavan.Test
             }
         }
 
+        private void RemoverCliente(AppDbContext context, Cliente cliente)
+        {
+            using (context = new AppDbContext(options))
+            {
+                context.Clientes.Remove(cliente);
+                context.SaveChanges();
+            }
+        }
+
         [Test]
         public async Task testePegaTodosRelatorios()
         {
@@ -94,6 +106,7 @@ namespace APIHavan.Test
             var condicaoPagamento = new CondicaoPagamento { condicaoPagamentoId = 1, descricao = "Pago", dias = "01/01/2020" };
 
             var condicaoPagamento2 = new CondicaoPagamento { condicaoPagamentoId = 2, descricao = "Atrasado", dias = "01/02/2020" };
+            var cliente = new Cliente { clienteId = 1, cnpj = "cnpjteste", razaoSocial = "razaosocialteste", email = "email1@email.com" };
 
             var context = new AppDbContext(options);
 
@@ -110,6 +123,7 @@ namespace APIHavan.Test
             RemoverProduto(context, produto);
             RemoverCondicao(context, condicaoPagamento);
             RemoverCondicao(context, condicaoPagamento2);
+            RemoverCliente(context, cliente);
         }
 
 
@@ -120,6 +134,9 @@ namespace APIHavan.Test
             var historicoPreco = new HistoricoPreco { id = 1, Produto = produto, preco = 10.2 };
 
             var condicaoPagamento = new CondicaoPagamento { condicaoPagamentoId = 1, descricao = "Pago", dias = "01/01/2020" };
+            var condicaoPagamento2 = new CondicaoPagamento { condicaoPagamentoId = 2, descricao = "Atrasado", dias = "01/02/2020" };
+
+            var cliente = new Cliente { clienteId = 1, cnpj = "cnpjteste", razaoSocial = "razaosocialteste", email = "email1@email.com" };
 
             var relatorioPagamento = new RelatorioPagamento { id = 1, HistorioPreco = historicoPreco, CondicaoPagamento = condicaoPagamento };
 
@@ -135,18 +152,22 @@ namespace APIHavan.Test
 
             RemoverListaRelatorios(context);
             RemoverHistorico(context, historicoPreco);
-            RemoverProduto(context, produto);
             RemoverCondicao(context, condicaoPagamento);
+            RemoverCondicao(context, condicaoPagamento2);
+            RemoverProduto(context, produto);
+            RemoverCliente(context, cliente);
         }
 
         [Test]
-        public async Task testeInsereHistoricos()
+        public async Task testeInsereRelatorios()
         {
             var historicoPreco = new HistoricoPreco { id = 1, Produto = produto, preco = 10.2 };
 
             var condicaoPagamento = new CondicaoPagamento { condicaoPagamentoId = 1, descricao = "Pago", dias = "01/01/2020" };
 
-            var relatorioPagamento = new RelatorioPagamento { id = 1, HistorioPreco = historicoPreco, CondicaoPagamento = condicaoPagamento };
+            var cliente = new Cliente { clienteId = 1, cnpj = "cnpjteste", razaoSocial = "razaosocialteste", email = "email1@email.com" };
+
+            var relatorioPagamento = new RelatorioPagamento { id = 1, HistorioPreco = historicoPreco, CondicaoPagamento = condicaoPagamento, Cliente = cliente };
 
             var context = new AppDbContext(options);
 
@@ -163,6 +184,7 @@ namespace APIHavan.Test
             RemoverHistorico(context, historicoPreco);
             RemoverProduto(context, produto);
             RemoverCondicao(context, condicaoPagamento);
+            RemoverCliente(context, cliente);
         }
 
         [Test]
@@ -188,14 +210,155 @@ namespace APIHavan.Test
             var resultDelete = await query.DeleteRelatorioPagamento(relatorioPagamento.id) as StatusCodeResult;
 
             Assert.AreEqual(204, resultDelete.StatusCode);
+            RemoverHistorico(context, historicoPreco);
+            RemoverProduto(context, produto);
+            RemoverCondicao(context, condicaoPagamento);
         }
 
+        [Test]
+        public async Task RetornaTipoCorreto()
+        {
+            var historicoPreco = new HistoricoPreco { id = 1, Produto = produto, preco = 10.2 };
 
+            var condicaoPagamento = new CondicaoPagamento { condicaoPagamentoId = 1, descricao = "Pago", dias = "01/01/2020" };
+            var condicaoPagamento2 = new CondicaoPagamento { condicaoPagamentoId = 2, descricao = "Atrasado", dias = "01/02/2020" };
 
+            var cliente = new Cliente { clienteId = 1, cnpj = "cnpjteste", razaoSocial = "razaosocialteste", email = "email1@email.com" };
 
-        //testar relatorio com cliente, produto e preço
-        //inserir os valores e checar
-        //verificar quando vazio ou não tem
+            var context = new AppDbContext(options);
 
+            PopularRelatorios(context);
+
+            var query = new RelatorioPagamentosController(context);
+
+            var result = await query.GetRelatorioPagamentos();
+
+            Assert.IsInstanceOf<ActionResult<IEnumerable<RelatorioPagamento>>>(result);
+            
+            RemoverListaRelatorios(context);
+            RemoverHistorico(context, historicoPreco);
+            RemoverProduto(context, produto);
+            RemoverCondicao(context, condicaoPagamento);
+            RemoverCondicao(context, condicaoPagamento2);
+            RemoverCliente(context, cliente);
+        }
+
+        [Test]
+        public async Task RetornaIdIncorreto()
+        {
+            var historicoPreco = new HistoricoPreco { id = 1, Produto = produto, preco = 10.2 };
+
+            var condicaoPagamento = new CondicaoPagamento { condicaoPagamentoId = 1, descricao = "Pago", dias = "01/01/2020" };
+            var condicaoPagamento2 = new CondicaoPagamento { condicaoPagamentoId = 2, descricao = "Atrasado", dias = "01/02/2020" };
+
+            var cliente = new Cliente { clienteId = 1, cnpj = "cnpjteste", razaoSocial = "razaosocialteste", email = "email1@email.com" };
+
+            var context = new AppDbContext(options);
+
+            PopularRelatorios(context);
+
+            var query = new RelatorioPagamentosController(context);
+
+            var result = await query.GetRelatorioPagamento(99);
+            var statusCode = result.Result as StatusCodeResult;
+            Assert.IsInstanceOf<NotFoundResult>(statusCode);
+
+            RemoverListaRelatorios(context);
+            RemoverHistorico(context, historicoPreco);
+            RemoverProduto(context, produto);
+            RemoverCondicao(context, condicaoPagamento);
+            RemoverCondicao(context, condicaoPagamento2);
+            RemoverCliente(context, cliente);
+        }
+
+        [Test]
+        public async Task testaDeleteQuandoIdInvalido()
+        {
+            var context = new AppDbContext(options);
+
+            var query = new RelatorioPagamentosController(context);
+
+            var resultDelete = await query.DeleteRelatorioPagamento(99) as StatusCodeResult;
+
+            Assert.AreEqual(404, resultDelete.StatusCode);
+        }
+
+        [Test]
+        public async Task testeInsereHistoricosParaCnpjFiltrado()
+        {
+            var historicoPreco = new HistoricoPreco { id = 1, Produto = produto, preco = 10.2 };
+
+            var condicaoPagamento = new CondicaoPagamento { condicaoPagamentoId = 1, descricao = "Pago", dias = "01/01/2020" };
+            var condicaoPagamento2 = new CondicaoPagamento { condicaoPagamentoId = 2, descricao = "Atrasado", dias = "01/02/2020" };
+
+            var cliente = new Cliente { clienteId = 1, cnpj = "cnpjteste", razaoSocial = "razaosocialteste", email = "email1@email.com" };
+
+            var context = new AppDbContext(options);
+            PopularRelatorios(context);
+
+            var query = new RelatorioFiltradoController(context);
+
+            var result = query.pegaRelatorioCnpjRazao("cnpjteste", "");
+            //result.Result.Value
+            var response = result.Result as OkObjectResult;
+            var item = response.Value as List<KeyValuePair<string, double>>;
+            List<string> chaves = new List<string>();
+            List<double> valores = new List<double>();
+
+            foreach (KeyValuePair<string, double> kvp in item)
+            {
+                chaves.Add(kvp.Key);
+                valores.Add(kvp.Value);
+            }
+
+            Assert.AreEqual(historicoPreco.Produto.Descricao, chaves[0]);
+            Assert.AreEqual(historicoPreco.preco, valores[0]);
+
+            RemoverListaRelatorios(context);
+            RemoverHistorico(context, historicoPreco);
+            RemoverCondicao(context, condicaoPagamento);
+            RemoverCondicao(context, condicaoPagamento2);
+            RemoverProduto(context, produto);
+            RemoverCliente(context, cliente);
+        }
+
+        [Test]
+        public async Task testeInsereHistoricosParaRazaoSocialFiltrado()
+        {
+            var historicoPreco = new HistoricoPreco { id = 1, Produto = produto, preco = 10.2 };
+
+            var condicaoPagamento = new CondicaoPagamento { condicaoPagamentoId = 1, descricao = "Pago", dias = "01/01/2020" };
+            var condicaoPagamento2 = new CondicaoPagamento { condicaoPagamentoId = 2, descricao = "Atrasado", dias = "01/02/2020" };
+
+            var cliente = new Cliente { clienteId = 1, cnpj = "cnpjteste", razaoSocial = "razaosocialteste", email = "email1@email.com" };
+
+            var context = new AppDbContext(options);
+            PopularRelatorios(context);
+
+            var query = new RelatorioFiltradoController(context);
+
+            var result = query.pegaRelatorioCnpjRazao("", "razaosocialteste");
+            
+            var response = result.Result as OkObjectResult;
+            var item = response.Value as List<KeyValuePair<string, double>>;
+            List<string> chaves = new List<string>();
+            List<double> valores = new List<double>();
+
+            foreach (KeyValuePair<string, double> kvp in item)
+            {
+                chaves.Add(kvp.Key);
+                valores.Add(kvp.Value);
+            }
+
+            Assert.AreEqual(historicoPreco.Produto.Descricao, chaves[0]);
+            Assert.AreEqual(historicoPreco.preco, valores[0]);
+
+            RemoverListaRelatorios(context);
+            RemoverHistorico(context, historicoPreco);
+            RemoverCondicao(context, condicaoPagamento);
+            RemoverCondicao(context, condicaoPagamento2);
+            RemoverProduto(context, produto);
+            RemoverCliente(context, cliente);
+        }
     }
 }

@@ -5,6 +5,7 @@ using NUnit.Framework;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace APIHavan.Test
 {
@@ -144,6 +145,66 @@ namespace APIHavan.Test
             var resultDelete = await query.DeleteProduto(produto.Id) as StatusCodeResult;
 
             Assert.AreEqual(204, resultDelete.StatusCode);
+        }
+
+
+
+
+        [Test]
+        public async Task RetornaTipoCorreto()
+        {
+            var context = new AppDbContext(options);
+
+            Popular(context);
+
+            var query = new ProdutosController(context);
+
+            var result = await query.GetProdutos();
+
+            Assert.IsInstanceOf<ActionResult<IEnumerable<Produto>>>(result);
+            RemoverLista(context);
+        }
+
+        [Test]
+        public async Task RetornaIdIncorreto()
+        {
+            var context = new AppDbContext(options);
+
+            Popular(context);
+
+            var query = new ProdutosController(context);
+
+            var result = await query.GetProduto(99);
+            var statusCode = result.Result as StatusCodeResult;
+            Assert.IsInstanceOf<NotFoundResult>(statusCode);
+
+            RemoverLista(context);
+        }
+
+        [Test]
+        public async Task RetornaNaoEncontradoQuandoIdEInvalido()
+        {
+            var produto = new Produto { Id = 1, Sku = "Sku1", Descricao = "teste" };
+
+            var context = new AppDbContext(options);
+
+            var query = new ProdutosController(context);
+
+            var result = await query.PutProduto(99, produto);
+
+            Assert.IsInstanceOf<BadRequestResult>(result);
+        }
+
+        [Test]
+        public async Task testaDeleteQuandoIdInvalido()
+        {
+            var context = new AppDbContext(options);
+
+            var query = new ProdutosController(context);
+
+            var resultDelete = await query.DeleteProduto(99) as StatusCodeResult;
+
+            Assert.AreEqual(404, resultDelete.StatusCode);
         }
     }
 }

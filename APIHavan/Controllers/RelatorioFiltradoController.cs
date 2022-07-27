@@ -22,39 +22,36 @@ namespace APIHavan.Controllers
 
         // GET api/<RelatorioFiltradoController>/5
         [HttpGet, ActionName("GetRelatorioFiltrado")]
-        public ActionResult<IEnumerable<KeyValuePair<string, double>>> pegaRelatorioCnpj(string cnpjCliente, string razaoSocialCliente)
+        public ActionResult<IEnumerable<KeyValuePair<string, double>>> pegaRelatorioCnpjRazao(string cnpjCliente, string razaoSocialCliente)
         {
-            var clientes = _context.Clientes.ToList();
-            var relatorios = _context.RelatorioPagamentos.ToList();
+            List <RelatorioPagamento> relatorios = new List<RelatorioPagamento>();
+            
             var historicos = _context.HistoricoPrecos.ToList();
             List<string> valoresProduto = new List<string>();
             List<double> valoresPreco = new List<double>();
+            List<KeyValuePair<string, double>> juncaoValores = new List<KeyValuePair<string, double>>();
 
-            Cliente clienteFiltrado = null;
+            Cliente clienteFiltrado = new Cliente();
 
             if (cnpjCliente != "")
             {
                 clienteFiltrado = _context.Clientes.Where(x => x.cnpj == cnpjCliente).FirstOrDefault();
             }
-
+            
             if (razaoSocialCliente != "")
             {
-                clienteFiltrado = _context.Clientes.Where(x => x.cnpj == cnpjCliente).FirstOrDefault();
+                clienteFiltrado = _context.Clientes.Where(x => x.razaoSocial == razaoSocialCliente).FirstOrDefault();
             }
 
-
-            var relatoriosFiltrados = relatorios.Where(r => r.Cliente.clienteId == clienteFiltrado.clienteId).ToList();
+            var relatoriosFiltrados = _context.RelatorioPagamentos.Where(r => r.Cliente.clienteId  == clienteFiltrado.clienteId).ToList();
 
             foreach (var relatorioFiltrado in relatoriosFiltrados)
             {
-                valoresProduto.Add(relatorioFiltrado.HistorioPreco.Produto.Descricao);
-                valoresPreco.Add(relatorioFiltrado.HistorioPreco.preco);
+                KeyValuePair<string, double> juncao = new KeyValuePair<string, double>(relatorioFiltrado.HistorioPreco.Produto.Descricao, relatorioFiltrado.HistorioPreco.preco);
+                juncaoValores.Add(juncao);
             }
-            var query = from produto in valoresProduto
-                        join preco in valoresPreco
-                        on produto equals preco.ToString()
-                        select new KeyValuePair<string, double>(produto, preco);
-            return Ok(query);
+          
+            return Ok(juncaoValores);
         }
     }
 }

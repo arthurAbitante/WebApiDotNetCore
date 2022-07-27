@@ -11,8 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WebHavan.Models;
-using WebHavan.Services;
 
 namespace ApiEmailHavan
 {
@@ -28,11 +26,7 @@ namespace ApiEmailHavan
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
-            services.AddTransient<WebHavan.Services.IMailService, WebHavan.Services.MailService>();
             services.AddControllers();
-            services.AddScoped<IMailService, MailService>();
-
 
             services.AddSwaggerGen(c =>
             {

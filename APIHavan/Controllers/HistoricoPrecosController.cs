@@ -9,8 +9,6 @@ using APIHavan.Data;
 using RabbitMQ.Client;
 using Newtonsoft.Json;
 using System.Text;
-using WebHavan.Models;
-using WebHavan.Services;
 using ApiEmailHavan.Models;
 
 namespace APIHavan.Controllers
@@ -26,11 +24,12 @@ namespace APIHavan.Controllers
         private const string QUEUE_NAME = "messages";
         private readonly Cliente _cliente;
 
-        public HistoricoPrecosController(AppDbContext context, IEmailSender emailSender, Cliente cliente)
+        //pegar o cliente do historico
+
+        public HistoricoPrecosController(AppDbContext context, IEmailSender emailSender)
         {
-            _context = context;
             _emailSender = emailSender;
-            _cliente = cliente;
+            _context = context;
             _factory = new ConnectionFactory
             {
                 HostName = "localhost"
@@ -76,7 +75,8 @@ namespace APIHavan.Controllers
                 //o put é somente utilizado para correção de um preço, então é enviado
                 //automaticamente para o cliente
 
-                var message = new Message(new string[] { _cliente.email }, "Test email async", "This is the content from our async email.", null);
+                //criar constante de mensagem
+                var message = new Message(new string[] { Constants.Constants.emailCliente }, "Test email async", "This is the content from our async email.", null);
                 await _emailSender.SendEmailAsync(message);
                 
 
@@ -112,7 +112,8 @@ namespace APIHavan.Controllers
             
             if (values > 0)
             {
-                var message = new Message(new string[] { _cliente.email }, "Test email async", "This is the content from our async email.", null);
+             
+                var message = new Message(new string[] { Constants.Constants.emailCliente }, "Test email async", "This is the content from our async email.", null);
                 await _emailSender.SendEmailAsync(message);
             }
 

@@ -105,7 +105,6 @@ namespace APIHavan.Test
             Assert.AreEqual(1, item.condicaoPagamentoId);
 
             RemoverCondicao(context, item);
-           // Assert.AreEqual(condicaoPagamento.condicaoPagamentoId, result.Value.condicaoPagamentoId);
         }
 
         [Test]
@@ -149,6 +148,62 @@ namespace APIHavan.Test
             Assert.AreEqual(204, resultDelete.StatusCode);
         }
 
+        [Test]
+        public async Task RetornaTipoCorreto()
+        {
+            var context = new AppDbContext(options);
+
+            Popular(context);
+
+            var query = new CondicaoPagamentosController(context);
+
+            var result = await query.GetCondicoesPagamentos();
+
+            Assert.IsInstanceOf<ActionResult<IEnumerable<CondicaoPagamento>>>(result);
+            RemoverLista(context);
+        }
+
+        [Test]
+        public async Task RetornaIdIncorreto()
+        {
+            var context = new AppDbContext(options);
+
+            Popular(context);
+
+            var query = new CondicaoPagamentosController(context);
+
+            var result = await query.GetCondicaoPagamento(99);
+            var statusCode = result.Result as StatusCodeResult;
+            Assert.IsInstanceOf<NotFoundResult>(statusCode);
+
+            RemoverLista(context);
+        }
+
+        [Test]
+        public async Task RetornaNaoEncontradoQuandoIdEInvalido()
+        {
+            var condicaoPagamento = new CondicaoPagamento { condicaoPagamentoId = 1, descricao = "Pago", dias = "01/01/2020" };
+
+            var context = new AppDbContext(options);
+
+            var query = new CondicaoPagamentosController(context);
+
+            var result = await query.PutCondicaoPagamento(99, condicaoPagamento);
+
+            Assert.IsInstanceOf<BadRequestResult>(result);
+        }
+
+        [Test]
+        public async Task testaDeleteQuandoIdInvalido()
+        {
+            var context = new AppDbContext(options);
+
+            var query = new CondicaoPagamentosController(context);
+
+            var resultDelete = await query.DeleteCondicaoPagamento(99) as StatusCodeResult;
+
+            Assert.AreEqual(404, resultDelete.StatusCode);
+        }
 
     }
 }
